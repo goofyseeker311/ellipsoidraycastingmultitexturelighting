@@ -31,16 +31,6 @@ camerazbuffersphere = zeros(spherebufferwidth, spherebufferheight); camerargbabu
 ratio = pi/180; thetasteps = flip(-180:horizontalstep:180,2)*ratio; phisteps = (0:verticalstep:180)*ratio; rays = zeros(raycount,6); raycounter = 1;
 for theta=thetasteps; for phi=phisteps; rays(raycounter,:) = createLine3d(phi,theta); raycounter++; endfor; endfor; trays = (ones(raycount,1)*cv) .+ rays;
 
-[X,Y,Z] = sphere(); sp = scenespheres; figure(1); clf; view(3); axis([-65 65 -65 65 -65 65]); hold on;
-plot3(cameravector(1),cameravector(2),cameravector(3),'ro'); plot3(cameravector(1)+10*cameravector(4),cameravector(2)+10*cameravector(5),cameravector(3)+10*cameravector(6),'bx');
-plot3([cameravector(1) cameravector(1)+10*cameravector(4)],[cameravector(2) cameravector(2)+10*cameravector(5)],[cameravector(3) cameravector(3)+10*cameravector(6)],'g');
-plot3([cameravector(1) cameraupvector(1)+30*cameraupvector(4)],[cameravector(2) cameraupvector(2)+30*cameraupvector(5)],[cameravector(3) cameraupvector(3)+30*cameraupvector(6)],'b');
-plot3([cameravector(1) camerarightvector(1)+20*camerarightvector(4)],[cameravector(2) camerarightvector(2)+20*camerarightvector(5)],[cameravector(3) camerarightvector(3)+20*camerarightvector(6)],'r');
-plot3(cameraupvector(1)+30*cameraupvector(4),cameraupvector(2)+30*cameraupvector(5),cameraupvector(3)+30*cameraupvector(6),'kx');
-plot3(camerarightvector(1)+20*camerarightvector(4),camerarightvector(2)+20*camerarightvector(5),camerarightvector(3)+20*camerarightvector(6),'bx');
-for u=1:nspheres; a=sp(u,4);ax=sp(u,5);ay=sp(u,6);az=sp(u,7); x=sp(u,1);y=sp(u,2);z=sp(u,3); surf((a/ax)*X+x,(a/ay)*Y+y,(a/az)*Z+z); endfor;
-plot3(kx,ky,kz,'y.'); plot3(pointlights(:,1),pointlights(:,2),pointlights(:,3),'rx'); hold off;
-
 [k, kn, kv, ku] = raysphereintersection(scenespheres(:,1:7), trays); kd=k(:,1);kb=k(:,2); m = max(kd);
 kc=zeros(raycount,3);kci=find(kb);kbi=kb(kci);kc(kci,:)=scenespheres(kbi,8:10); kt=scenespheres(kbi,11); kx=kn(kci,1);ky=kn(kci,2);kz=kn(kci,3);kcicount=size(kci,1);knc=kn(kci,:);
 kc1=reshape(kc(:,1),spherebufferheight,spherebufferwidth); kc2=reshape(kc(:,2),spherebufferheight,spherebufferwidth); kc3=reshape(kc(:,3),spherebufferheight,spherebufferwidth);
@@ -50,6 +40,16 @@ kut(kcti,1)=reshape(wimage1,wmst,1)(flati);kut(kcti,2)=reshape(wimage2,wmst,1)(f
 kut1=reshape(kut(:,1),spherebufferheight,spherebufferwidth);kut2=reshape(kut(:,2),spherebufferheight,spherebufferwidth);kut3=reshape(kut(:,3),spherebufferheight,spherebufferwidth);
 renderim=zeros(spherebufferheight,spherebufferwidth,3); renderim(:,:,1) = kc1.*kut1; renderim(:,:,2) = kc2.*kut2; renderim(:,:,3) = kc3.*kut3;
 figure(2); clf; imshow(renderim, "xdata", [-180 180], "ydata", [-90 90]); axis on; figure(3); hist(nonzeros(kd),30); imwrite(renderim,"testCCCA0.png");
+
+[X,Y,Z] = sphere(); sp = scenespheres; figure(1); clf; view(3); axis([-65 65 -65 65 -65 65]); hold on;
+plot3(cameravector(1),cameravector(2),cameravector(3),'ro'); plot3(cameravector(1)+10*cameravector(4),cameravector(2)+10*cameravector(5),cameravector(3)+10*cameravector(6),'bx');
+plot3([cameravector(1) cameravector(1)+10*cameravector(4)],[cameravector(2) cameravector(2)+10*cameravector(5)],[cameravector(3) cameravector(3)+10*cameravector(6)],'g');
+plot3([cameravector(1) cameraupvector(1)+30*cameraupvector(4)],[cameravector(2) cameraupvector(2)+30*cameraupvector(5)],[cameravector(3) cameraupvector(3)+30*cameraupvector(6)],'b');
+plot3([cameravector(1) camerarightvector(1)+20*camerarightvector(4)],[cameravector(2) camerarightvector(2)+20*camerarightvector(5)],[cameravector(3) camerarightvector(3)+20*camerarightvector(6)],'r');
+plot3(cameraupvector(1)+30*cameraupvector(4),cameraupvector(2)+30*cameraupvector(5),cameraupvector(3)+30*cameraupvector(6),'kx');
+plot3(camerarightvector(1)+20*camerarightvector(4),camerarightvector(2)+20*camerarightvector(5),camerarightvector(3)+20*camerarightvector(6),'bx');
+for u=1:nspheres; a=sp(u,4);ax=sp(u,5);ay=sp(u,6);az=sp(u,7); x=sp(u,1);y=sp(u,2);z=sp(u,3); surf((a/ax)*X+x,(a/ay)*Y+y,(a/az)*Z+z); endfor;
+plot3(kx,ky,kz,'y.'); plot3(pointlights(:,1),pointlights(:,2),pointlights(:,3),'rx'); hold off;
 
 kl=zeros(raycount,3); for v=1:pointlightscount; printf("v/plcount: %i/%i\n",v,pointlightscount); pla=(ones(kcicount,1)*pointlights(v,1:3));
 plv=pla.-knc; pld=sqrt(sum(plv.^2,2)); pld3=pld*ones(1,3); plnv=plv./pld3; lv=[knc.+(0.00000001.*plnv) plnv]; [ck, ckn, ckuv] = raysphereintersection(scenespheres(:,1:7), lv);
